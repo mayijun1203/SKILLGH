@@ -97,6 +97,130 @@ write.csv(df6,
 
 
 
+# Data Viz
+# Chart
+library(tidyverse)
+url='https://new.mta.info/document/20441'
+df=read.csv(url,stringsAsFactors=F)
+df = df %>%
+  mutate(Date = as.Date(Date, '%m/%d/%Y')) %>%
+  mutate(Subway = as.integer(Subways..Total.Estimated.Ridership)) %>%
+  mutate(Bus = as.integer(Buses..Total.Estimated.Ridership)) %>%
+  arrange(Date) %>%
+  select(Date, Subway, Bus) %>% 
+  gather(key=Type,value=Ridership,c('Subway','Bus'))
+
+
+
+# ggplot2
+# qplot
+qplot(x=Date,y=Ridership,data=df,geom='point')
+
+# ggplot
+fig=ggplot()+
+  geom_line(data=df,mapping=aes(x=Date,y=Ridership,color=Type),size=0.5)+
+  theme_minimal()+
+  scale_color_manual(values=c('steelblue', 'tomato'))+
+  scale_x_date(date_breaks='2 months',date_minor_breaks='1 month',date_labels="%b %Y",expand=c(0.01,0.01))+
+  scale_y_continuous(n.breaks=5,labels=scales::label_number_si(0.1),expand=c(0.05,0.05))+
+  labs(title=paste0('Subway and Bus Estimated Ridership ',format(min(df$Date),'%m/%d/%Y'),' - ',format(max(df$Date), '%m/%d/%Y')),
+       caption='Source: MTA',
+       color='')+
+  theme(plot.title=element_text(family='sans',face='bold',size=14,hjust=0.5),
+        plot.caption=element_text(size=10),
+        legend.text=element_text(size=13),
+        axis.title=element_text(size=12),
+        axis.text=element_text(size=11),
+        legend.position = 'top')
+fig
+ggsave('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.pdf',plot=fig,width=11,height=8.5,dpi=300)
+
+
+
+# plotly
+library(plotly)
+fig=ggplotly(fig)
+fig
+htmlwidgets::saveWidget(fig,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.html',selfcontained = T)
+
+
+
+
+
+fig=px.line(df,
+            x='Date',
+            y=['Subway','Bus'],
+            color_discrete_sequence=['tomato','steelblue'],
+            title='<b>Subway and Bus Estimated Ridership '+df.iloc[0,0].strftime('%m/%d/%Y')+' - '+df.iloc[-1,0].strftime('%m/%d/%Y')+' (Source: '+"</b><a href='https://new.mta.info/coronavirus/ridership'>MTA</a>"+'<b>)</b>',
+            template='plotly_white')
+fig.update_layout(
+  title={'font':{'family':'arial',
+    'size':20,
+    'color':'black'},
+    'x':0.5,
+    'xanchor':'center'},
+  legend={'orientation':'h',
+    'title':{'text':''},
+    'font':{'family':'arial',
+      'size':16,
+      'color':'black'},
+    'x':0.5,
+    'xanchor':'center',
+    'y':1,
+    'yanchor':'bottom'},
+  xaxis={'title':{'text':'Date',
+    'font':{'family':'arial',
+      'size':14,
+      'color':'black'}},
+    'tickfont':{'family':'arial',
+      'size':12,
+      'color':'black'},
+    'fixedrange':True,
+    'showgrid':True},
+  yaxis={'title':{'text':'Ridership',
+    'font':{'family':'arial',
+      'size':14,
+      'color':'black'}},
+    'tickfont':{'family':'arial',
+      'size':12,
+      'color':'black'},
+    'rangemode':'nonnegative',
+    'fixedrange':True,
+    'showgrid':True},
+  dragmode=False,
+  hovermode='x unified'
+)
+fig.update_traces(
+  line={'width':2},
+  hovertemplate='%{y:#.3s}'
+)
+fig.write_html(path+'index.html',include_plotlyjs='cdn')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Tips
 # Read data
 df = read.csv(
@@ -105,6 +229,8 @@ df = read.csv(
   colClasses = c(PUMA = 'character', ST = 'character'),
 )
 
+
+# Chunks
 h = as.character(
   read.csv(
     'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/psam_h36.csv',
