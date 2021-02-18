@@ -147,6 +147,22 @@ htmlwidgets::saveWidget(fig,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.htm
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fig=px.line(df,
             x='Date',
             y=['Subway','Bus'],
