@@ -131,17 +131,82 @@ fig=ggplot()+
         legend.text=element_text(size=13),
         axis.title=element_text(size=12),
         axis.text=element_text(size=11),
-        legend.position = 'top')
+        legend.position='top')
 fig
 ggsave('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.pdf',plot=fig,width=11,height=8.5,dpi=300)
 
 
 
+
+
+
+
 # plotly
+# from ggplot
 library(plotly)
 fig=ggplotly(fig)
 fig
-htmlwidgets::saveWidget(fig,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.html',selfcontained = T)
+htmlwidgets::saveWidget(fig,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.html')
+
+
+
+
+
+
+
+# from scratch
+fig=plot_ly(data=df,
+            x=~Date,
+            y=df~Ridership,
+            color=~Type,
+            type='scatter',
+            mode='lines')
+fig
+
+
+
+
+
+fig=plot_ly()%>%
+  add_trace(data=subset(df,Type=='Subway'),
+            x=~Date,
+            y=~Ridership,
+            type='scatter',
+            mode='lines',
+            name='Subway',
+            line=list(width=2,
+                      color='tomato'),
+            hovertemplate='%{y:#.3s}') %>%
+  add_trace(data=subset(df,Type=='Bus'),
+            x=~Date,
+            y=~Ridership,
+            type='scatter',
+            mode='lines',
+            name='Bus',
+            line=list(width=2,
+                      color='steelblue'),
+            hovertemplate='%{y:#.3s}') %>%
+  layout(title=list(text=paste0('<b>Subway and Bus Estimated Ridership ',format(min(df$Date),'%m/%d/%Y'),' - ',format(max(df$Date), '%m/%d/%Y'),' (Source: ',"</b><a href='https://new.mta.info/coronavirus/ridership'>MTA</a>",'<b>)</b>'),
+                    font=list(family='arial',
+                              size=20,
+                              color='black'),
+                    x=0.5,
+                    xanchor='center'),
+         legend=list(orientation='h',
+                     font=list(family='arial',
+                               size=16,
+                               color='black'),
+                     x=0.5,
+                     xanchor='center',
+                     y=1,
+                     yanchor='bottom'),
+         margin=list(l=100,
+                     r=100,
+                     t=100,
+                     b=100),
+         dragmode=F,
+         hovermode='x unified')
+fig
 
 
 
@@ -153,37 +218,7 @@ htmlwidgets::saveWidget(fig,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.htm
 
 
 
-
-
-
-
-
-
-
-
-
-
-fig=px.line(df,
-            x='Date',
-            y=['Subway','Bus'],
-            color_discrete_sequence=['tomato','steelblue'],
-            title='<b>Subway and Bus Estimated Ridership '+df.iloc[0,0].strftime('%m/%d/%Y')+' - '+df.iloc[-1,0].strftime('%m/%d/%Y')+' (Source: '+"</b><a href='https://new.mta.info/coronavirus/ridership'>MTA</a>"+'<b>)</b>',
-            template='plotly_white')
-fig.update_layout(
-  title={'font':{'family':'arial',
-    'size':20,
-    'color':'black'},
-    'x':0.5,
-    'xanchor':'center'},
-  legend={'orientation':'h',
-    'title':{'text':''},
-    'font':{'family':'arial',
-      'size':16,
-      'color':'black'},
-    'x':0.5,
-    'xanchor':'center',
-    'y':1,
-    'yanchor':'bottom'},
+  template='plotly_white')
   xaxis={'title':{'text':'Date',
     'font':{'family':'arial',
       'size':14,
@@ -203,13 +238,9 @@ fig.update_layout(
     'rangemode':'nonnegative',
     'fixedrange':True,
     'showgrid':True},
-  dragmode=False,
-  hovermode='x unified'
+
 )
-fig.update_traces(
-  line={'width':2},
-  hovertemplate='%{y:#.3s}'
-)
+
 fig.write_html(path+'index.html',include_plotlyjs='cdn')
 
 
