@@ -155,12 +155,7 @@ htmlwidgets::saveWidget(fig,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.htm
 
 
 # from scratch
-fig=plot_ly(data=df,
-            x=~Date,
-            y=df~Ridership,
-            color=~Type,
-            type='scatter',
-            mode='lines')
+fig=plot_ly(data=df,x=~Date,y=df~Ridership,color=~Type,type='scatter',mode='lines')
 fig
 
 
@@ -218,7 +213,6 @@ fig
 
 
 
-  template='plotly_white')
   xaxis={'title':{'text':'Date',
     'font':{'family':'arial',
       'size':14,
