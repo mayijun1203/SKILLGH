@@ -152,13 +152,9 @@ htmlwidgets::saveWidget(fig,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.htm
 
 
 
-
-
 # from scratch
 fig=plot_ly(data=df,x=~Date,y=df~Ridership,color=~Type,type='scatter',mode='lines')
 fig
-
-
 
 
 
@@ -187,6 +183,28 @@ fig=plot_ly()%>%
                               color='black'),
                     x=0.5,
                     xanchor='center'),
+         xaxis=list(title=list(text='Date',
+                               font=list(family='arial',
+                                         size=14,
+                                         color='black')),
+                    tickfont=list(family='arial',
+                                  size=12,
+                                  color='black'),
+                    fixedrange=T,
+                    showgrid=T),
+         yaxis=list(title=list(text='Ridership',
+                               font=list(family='arial',
+                                         size=14,
+                                         color='black')),
+                    tickfont=list(family='arial',
+                                  size=12,
+                                  color='black'),
+                    rangemode='nonnegative',
+                    fixedrange=T,
+                    showgrid=T,
+                    zeroline=T,
+                    zerolinecolor="#eee",
+                    zerolinewidth=3),
          legend=list(orientation='h',
                      font=list(family='arial',
                                size=16,
@@ -202,40 +220,7 @@ fig=plot_ly()%>%
          dragmode=F,
          hovermode='x unified')
 fig
-
-
-
-
-
-
-
-
-
-
-
-  xaxis={'title':{'text':'Date',
-    'font':{'family':'arial',
-      'size':14,
-      'color':'black'}},
-    'tickfont':{'family':'arial',
-      'size':12,
-      'color':'black'},
-    'fixedrange':True,
-    'showgrid':True},
-  yaxis={'title':{'text':'Ridership',
-    'font':{'family':'arial',
-      'size':14,
-      'color':'black'}},
-    'tickfont':{'family':'arial',
-      'size':12,
-      'color':'black'},
-    'rangemode':'nonnegative',
-    'fixedrange':True,
-    'showgrid':True},
-
-)
-
-fig.write_html(path+'index.html',include_plotlyjs='cdn')
+htmlwidgets::saveWidget(fig,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.html')
 
 
 
