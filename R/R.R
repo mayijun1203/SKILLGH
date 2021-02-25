@@ -246,10 +246,10 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.html'
 # Mapping
 library(tidyverse)
 library(sf)
-df=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/subwayridership.geojson')
+df=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/subwayridership.geojson')
 df=st_set_crs(df,4326)
 
-zcta=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/zcta.geojson')
+zcta=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/zcta.geojson')
 zcta=st_set_crs(zcta,4326)
 zcta$test=1:nrow(zcta)
 
@@ -295,8 +295,8 @@ library(sf)
 library(geojsonsf)
 library(rjson)
 library(plotly)
-zcta=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/zcta.geojson')
-zcta=st_set_crs(zcta,4326)
+zcta=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/zcta.geojson')
+zcta=st_set_crs(zcta,4326)zcta=st_set_crs(zcta,4326)
 zcta$test=1:nrow(zcta)
 zctajs=fromJSON(sf_geojson(zcta))
 
@@ -350,6 +350,16 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuou
 
 
 
+# Line
+library(sf)
+library(geojsonsf)
+library(rjson)
+library(plotly)
+sc=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/sidewalk_cafe.geojson')
+sc=st_set_crs(sc,4326)
+sc$test=1:nrow(sc)
+scjs=fromJSON(sf_geojson(sc))
+
 
 
 
@@ -366,7 +376,7 @@ library(sf)
 library(geojsonsf)
 library(rjson)
 library(plotly)
-df=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/subwayridership.geojson')
+df=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/subwayridership.geojson')
 df=st_set_crs(df,4326)
 df$HoverText=paste0('Station: ',
                     df$CplxName,
@@ -446,6 +456,7 @@ library(sf)
 library(geojsonsf)
 library(rjson)
 library(plotly)
+zcta=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/zcta.geojson')
 zcta=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/zcta.geojson')
 zcta=st_set_crs(zcta,4326)
 zcta$test=1:nrow(zcta)
@@ -554,7 +565,7 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/discrete_
 # Point
 library(sf)
 library(plotly)
-df=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/subwayridership.geojson')
+df=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/subwayridership.geojson')
 df=st_set_crs(df,4326)
 df$DiffPctCat2=factor(df$DiffPctCat,levels=c('<=5%','6%~10%','11%~15%','16%~20%','>20%'))
 df$HoverText=paste0('Station: ',
