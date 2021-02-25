@@ -97,6 +97,19 @@ write.csv(df6,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Data Viz
 # Chart
 library(tidyverse)
@@ -289,7 +302,7 @@ ggsave('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/subway.pdf',plot=p,width=11,
 
 
 # plotly
-# Continuous
+# Continuous Value
 # Polygon
 library(sf)
 library(geojsonsf)
@@ -344,12 +357,6 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuou
 
 
 
-
-
-
-
-
-
 # Line
 library(sf)
 library(geojsonsf)
@@ -357,14 +364,49 @@ library(rjson)
 library(plotly)
 sl=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/subway_line.geojson')
 sl=st_set_crs(sl,4326)
+sl$test=1:nrow(sl)
+sl=st_transform(sl,6539)
+sl=st_buffer(sl,200,endCapStyle='FLAT')
+sl=st_transform(sl,4326)
+sljs=fromJSON(sf_geojson(sl))
 
-sc$test=1:nrow(sc)
-scjs=fromJSON(sf_geojson(sc))
-
-
-
-
-
+p=plot_ly(type='choroplethmapbox',
+          name='',
+          geojson=sljs,
+          featureidkey='properties.cartodb_id',
+          locations=sl$cartodb_id,
+          z=sl$test,
+          colorscale='Portland',
+          marker=list(line=list(width=0)),
+          colorbar=list(lenmode='fraction',
+                        len=1,
+                        y=0.5,
+                        yanchor='middle',
+                        title=list(text='Test',
+                                   font=list(family='arial',
+                                             size=16,
+                                             color='black')),
+                        tickfont=list(family='arial',
+                                      size=12,
+                                      color='black')),
+          reversescale=T,
+          hovertemplate='ZCTA: %{location}<br>Test: %{z:#.2f}') %>%
+  layout(mapbox=list(style='carto-positron',
+                     center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
+                                 lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
+                     zoom=9.5),
+         title=list(text='<b>Continuous Point</b>',
+                    font=list(family='arial',
+                              size=20,
+                              color='black'),
+                    x=0.5,
+                    xanchor='center'),
+         margin=list(l=50,
+                     r=50,
+                     t=50,
+                     b=50))
+p
+htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuos_line.html')
 
 
 
@@ -451,7 +493,7 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuou
 
 
 
-# Discrete
+# Discrete Value
 # Polygon
 library(sf)
 library(geojsonsf)
@@ -563,6 +605,73 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/discrete_
 
 
 
+
+# Line
+library(sf)
+library(plotly)
+sl=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/subway_line.geojson')
+sl=st_set_crs(sl,4326)
+sl$div2=ifelse(is.na(sl$div),'SIR',sl$div)
+sl$div2=factor(sl$div2,levels=c('BMT','IRT','IND','SIR'))
+
+p=plot_ly()%>%
+  add_sf(type='scattermapbox',
+         name='BMT',
+         data=subset(sl,div2=='BMT'),
+         mode='lines',
+         line=list(width=2,
+                   color='blue')) %>%
+  add_sf(type='scattermapbox',
+         name='IRT',
+         data=subset(sl,div2=='IRT'),
+         mode='lines',
+         line=list(width=2,
+                   color='red')) %>%
+  add_sf(type='scattermapbox',
+         name='IND',
+         data=subset(sl,div2=='IND'),
+         mode='lines',
+         line=list(width=2,
+                   color='green')) %>%
+  add_sf(type='scattermapbox',
+         name='SIR',
+         data=subset(sl,div2=='SIR'),
+         mode='lines',
+         line=list(width=2,
+                   color='purple')) %>%
+  layout(mapbox=list(style='carto-positron',
+                     center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
+                                 lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
+                     zoom=9.5),
+         title=list(text='<b>Discrete Line</b>',
+                    font=list(family='arial',
+                              size=20,
+                              color='black'),
+                    x=0.5,
+                    xanchor='center'),
+         legend=list(orientation='v',
+                     font=list(family='arial',
+                               size=16,
+                               color='black'),
+                     x=1,
+                     xanchor='right',
+                     y=1,
+                     yanchor='top'),
+         margin=list(l=50,
+                     r=50,
+                     t=50,
+                     b=50))
+p
+htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/discrete_line.html')
+
+
+
+
+
+
+
+
+
 # Point
 library(sf)
 library(plotly)
@@ -582,83 +691,42 @@ df$HoverText=paste0('Station: ',
                     format(df$DiffPct*100,digits=2),
                     '%')
 
-p=plot_ly()%>%
-  add_sf(type='scattermapbox',
-         name='<=5%',
-         data=subset(df,DiffPctCat2=='<=5%'),
-         mode='markers',
-         marker=list(size=8,
-                     color='#fff5eb')) %>%
-  add_sf(type='scattermapbox',
-         name='6%~10%',
-         data=subset(df,DiffPctCat2=='6%~10%'),
-         mode='markers',
-         marker=list(size=8,
-                     color='#fed2a6')) %>%
-  add_sf(type='scattermapbox',
-         name='11%~15%',
-         data=subset(df,DiffPctCat2=='11%~15%'),
-         mode='markers',
-         marker=list(size=8,
-                     color='#fd9243')) %>%
-  add_sf(type='scattermapbox',
-         name='16%~20%',
-         data=subset(df,DiffPctCat2=='16%~20%'),
-         mode='markers',
-         marker=list(size=8,
-                     color='#df4f05')) %>%
-  add_sf(type='scattermapbox',
-         name='>20%',
-         data=subset(df,DiffPctCat2=='>20%'),
-         mode='markers',
-         marker=list(size=8,
-                     color='#7f2704')) %>%
-  layout(mapbox=list(style='carto-positron',
-                     center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
-                                 lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
-                     zoom=9.5),
-         title=list(text='<b>Discrete Point</b>',
-                    font=list(family='arial',
-                              size=20,
-                              color='black'),
-                    x=0.5,
-                    xanchor='center'),
-         legend=list(orientation='v',
-                     font=list(family='arial',
-                               size=16,
-                               color='black'),
-                     x=1,
-                     xanchor='right',
-                     y=1,
-                     yanchor='top'),
-         margin=list(l=50,
-                     r=50,
-                     t=50,
-                     b=50))
+cat=c('<=5%','6%~10%','11%~15%','16%~20%','>20%')
+catcolor=c('#fff5eb','#fed2a6','#fd9243','#df4f05','#7f2704')
+
+p=plot_ly()
+for (i in 1:length(cat)){
+  p=p %>% add_sf(type='scattermapbox',
+                 name=cat[i],
+                 data=subset(df,DiffPctCat2==cat[i]),
+                 mode='markers',
+                 marker=list(size=8,
+                             color=catcolor[i]))
+}
+p=p %>% layout(mapbox=list(style='carto-positron',
+                           center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
+                                       lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
+                           zoom=9.5),
+               title=list(text='<b>Discrete Point</b>',
+                          font=list(family='arial',
+                                    size=20,
+                                    color='black'),
+                          x=0.5,
+                          xanchor='center'),
+               legend=list(orientation='v',
+                           font=list(family='arial',
+                                     size=16,
+                                     color='black'),
+                           x=1,
+                           xanchor='right',
+                           y=1,
+                           yanchor='top'),
+               margin=list(l=50,
+                           r=50,
+                           t=50,
+                           b=50))
 p
 htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/discrete_point.html')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
