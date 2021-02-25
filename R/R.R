@@ -156,11 +156,13 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.html'
 
 
 # from scratch
-p=plot_ly(data=df,x=~Date,y=df~Ridership,color=~Type,type='scatter',mode='lines')
+# quick mapping
+p=plot_ly(data=df,x=~Date,y=~Ridership,split=~Type2,type='scatter',mode='lines')
 p
 
 
 
+# with layers
 p=plot_ly()%>%
   add_trace(data=subset(df,Type=='Subway'),
             x=~Date,
@@ -206,7 +208,7 @@ p=plot_ly()%>%
                     fixedrange=T,
                     showgrid=T,
                     zeroline=T,
-                    zerolinecolor="#eee",
+                    zerolinecolor='#eee',
                     zerolinewidth=3),
          legend=list(orientation='h',
                      font=list(family='arial',
@@ -241,7 +243,7 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.html'
 
 
 
-# Spatial
+# Mapping
 library(tidyverse)
 library(sf)
 df=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/subwayridership.geojson')
@@ -253,6 +255,9 @@ zcta$test=1:nrow(zcta)
 
 df=st_join(df,zcta,join=st_intersects,left=T)
 df$DiffPctCat2=factor(df$DiffPctCat,levels=c('<=5%','6%~10%','11%~15%','16%~20%','>20%'))
+
+plot(df)
+
 
 
 #ggplot2
@@ -272,7 +277,6 @@ p=ggplot()+
   theme(plot.title=element_text(family='sans',face='bold',size=14,hjust=0.5),
         legend.position='right',
         legend.text=element_text(size=13))
-
 p
 ggsave('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/subway.pdf',plot=p,width=11,height=8.5,dpi=300)
 
@@ -281,30 +285,12 @@ ggsave('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/subway.pdf',plot=p,width=11,
 
 
 
+
+
+
 # plotly
-library(plotly)
-p=plot_ly(data=df,
-            color=~DiffPctCat2,
-            type='scattermapbox',
-            mode='markers',
-            marker=list(symbol='circle')) %>%
-  layout(mapbox=list(style='carto-positron',
-                     center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
-                                 lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
-                     zoom=9.5))
-p
-
-
-
-
-
-
-
-
-
-
-# Polygon
 # Continuous
+# Polygon
 library(sf)
 library(geojsonsf)
 library(rjson)
@@ -314,34 +300,33 @@ zcta=st_set_crs(zcta,4326)
 zcta$test=1:nrow(zcta)
 zctajs=fromJSON(sf_geojson(zcta))
 
-p=plot_ly() %>%
-  add_trace(type='choroplethmapbox',
-            name='',
-            geojson=zctajs,
-            featureidkey='properties.ZCTA5CE10',
-            locations=zcta$ZCTA5CE10,
-            z=zcta$test,
-            colorscale='Viridis',
-            marker=list(line=list(color='white',
-                                  width=0.1)),
-            colorbar=list(lenmode='fraction',
-                          len=1,
-                          y=0.5,
-                          yanchor='middle',
-                          title=list(text='Test',
-                                     font=list(family='arial',
-                                               size=16,
-                                               color='black')),
-                          tickfont=list(family='arial',
-                                        size=12,
-                                        color='black')),
-            reversescale=T,
-            hovertemplate='ZCTA: %{location}<br>Test: %{z:#.2f}') %>%
+p=plot_ly(type='choroplethmapbox',
+          name='',
+          geojson=zctajs,
+          featureidkey='properties.ZCTA5CE10',
+          locations=zcta$ZCTA5CE10,
+          z=zcta$test,
+          colorscale='Viridis',
+          marker=list(line=list(color='white',
+                                width=0.1)),
+          colorbar=list(lenmode='fraction',
+                        len=1,
+                        y=0.5,
+                        yanchor='middle',
+                        title=list(text='Test',
+                                   font=list(family='arial',
+                                             size=16,
+                                             color='black')),
+                        tickfont=list(family='arial',
+                                      size=12,
+                                      color='black')),
+          reversescale=T,
+          hovertemplate='ZCTA: %{location}<br>Test: %{z:#.2f}') %>%
   layout(mapbox=list(style='carto-positron',
                      center=list(lon=(st_bbox(zcta)['xmin']+st_bbox(zcta)['xmax'])/2,
                                  lat=(st_bbox(zcta)['ymin']+st_bbox(zcta)['ymax'])/2),
                      zoom=8),
-         title=list(text='<b>ZCTA Test</b>',
+         title=list(text='<b>Continuous Polygon</b>',
                     font=list(family='arial',
                               size=20,
                               color='black'),
@@ -352,13 +337,111 @@ p=plot_ly() %>%
                      t=50,
                      b=50))
 p
-htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/subway_continuous.html')
+htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuous_polygon.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Point
+library(sf)
+library(geojsonsf)
+library(rjson)
+library(plotly)
+df=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/subwayridership.geojson')
+df=st_set_crs(df,4326)
+df$HoverText=paste0('Station: ',
+                    df$CplxName,
+                    '<br>',
+                    'Sept 2020: ',
+                    df$E202009,
+                    '<br>',
+                    'Oct 2020: ',
+                    df$E202010,
+                    '<br>',
+                    '% Change: ',
+                    format(df$DiffPct*100,digits=2),
+                    '%')
+df=st_transform(df,6539)
+df=st_buffer(df,500)
+df=st_transform(df,4326)
+dfjs=fromJSON(sf_geojson(df))
+
+p=plot_ly(type='choroplethmapbox',
+          name='',
+          geojson=dfjs,
+          featureidkey='properties.CplxID',
+          locations=df$CplxID,
+          z=df$DiffPct,
+          zmin=-0.1,
+          zmax=0.5,
+          colorscale=list(c(0,'rgb(255,0,0)'),
+                          c(1/6,'rgb(250,250,250'),
+                          c(1,'rgb(0,0,255)')),
+          colorbar=list(lenmode='fraction',
+                        len=1,
+                        y=0.5,
+                        yanchor='middle',
+                        title=list(text='Percent Change',
+                                   font=list(family='arial',
+                                             size=16,
+                                             color='black')),
+                        tickvals=c(-0.1,0,0.1,0.2,0.3,0.4,0.5),
+                        ticktext=c('<=-10%','0%','10%','20%','30%','40%','>=50%'),
+                        tickfont=list(family='arial',
+                                      size=12,
+                                      color='black')),
+          marker=list(line=list(width=0),
+                      opacity=0.8),
+          hovertext=df$HoverText,
+          hoverinfo='text') %>%
+  layout(mapbox=list(style='carto-positron',
+                     center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
+                                 lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
+                     zoom=9.5),
+         title=list(text='<b>Continuous Point</b>',
+                    font=list(family='arial',
+                              size=20,
+                              color='black'),
+                    x=0.5,
+                    xanchor='center'),
+         margin=list(l=50,
+                     r=50,
+                     t=50,
+                     b=50))
+p
+htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuous_point.html')
+
+
+
+
+
+
 
 
 
 
 
 # Discrete
+# Polygon
 library(sf)
 library(geojsonsf)
 library(rjson)
@@ -448,7 +531,7 @@ p=plot_ly() %>%
                      center=list(lon=(st_bbox(zcta)['xmin']+st_bbox(zcta)['xmax'])/2,
                                  lat=(st_bbox(zcta)['ymin']+st_bbox(zcta)['ymax'])/2),
                      zoom=8),
-         title=list(text='<b>ZCTA Test</b>',
+         title=list(text='<b>Discrete Polygon</b>',
                     font=list(family='arial',
                               size=20,
                               color='black'),
@@ -459,7 +542,115 @@ p=plot_ly() %>%
                      t=50,
                      b=50))
 p
-htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/subway_discrete.html')
+htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/discrete_polygon.html')
+
+
+
+
+
+
+
+
+# Point
+library(sf)
+library(plotly)
+df=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/subwayridership.geojson')
+df=st_set_crs(df,4326)
+df$DiffPctCat2=factor(df$DiffPctCat,levels=c('<=5%','6%~10%','11%~15%','16%~20%','>20%'))
+df$HoverText=paste0('Station: ',
+                    df$CplxName,
+                    '<br>',
+                    'Sept 2020: ',
+                    df$E202009,
+                    '<br>',
+                    'Oct 2020: ',
+                    df$E202010,
+                    '<br>',
+                    '% Change: ',
+                    format(df$DiffPct*100,digits=2),
+                    '%')
+
+p=plot_ly()%>%
+  add_sf(type='scattermapbox',
+         name='<=5%',
+         data=subset(df,DiffPctCat2=='<=5%'),
+         mode='markers',
+         marker=list(size=8,
+                     color='#fff5eb')) %>%
+  add_sf(type='scattermapbox',
+         name='6%~10%',
+         data=subset(df,DiffPctCat2=='6%~10%'),
+         mode='markers',
+         marker=list(size=8,
+                     color='#fed2a6')) %>%
+  add_sf(type='scattermapbox',
+         name='11%~15%',
+         data=subset(df,DiffPctCat2=='11%~15%'),
+         mode='markers',
+         marker=list(size=8,
+                     color='#fd9243')) %>%
+  add_sf(type='scattermapbox',
+         name='16%~20%',
+         data=subset(df,DiffPctCat2=='16%~20%'),
+         mode='markers',
+         marker=list(size=8,
+                     color='#df4f05')) %>%
+  add_sf(type='scattermapbox',
+         name='>20%',
+         data=subset(df,DiffPctCat2=='>20%'),
+         mode='markers',
+         marker=list(size=8,
+                     color='#7f2704')) %>%
+  layout(mapbox=list(style='carto-positron',
+                     center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
+                                 lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
+                     zoom=9.5),
+         title=list(text='<b>Discrete Point</b>',
+                    font=list(family='arial',
+                              size=20,
+                              color='black'),
+                    x=0.5,
+                    xanchor='center'),
+         legend=list(orientation='v',
+                     font=list(family='arial',
+                               size=16,
+                               color='black'),
+                     x=1,
+                     xanchor='right',
+                     y=1,
+                     yanchor='top'),
+         margin=list(l=50,
+                     r=50,
+                     t=50,
+                     b=50))
+p
+htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/discrete_point.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
