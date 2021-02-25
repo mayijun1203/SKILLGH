@@ -355,8 +355,9 @@ library(sf)
 library(geojsonsf)
 library(rjson)
 library(plotly)
-sc=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/sidewalk_cafe.geojson')
-sc=st_set_crs(sc,4326)
+sl=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/subway_line.geojson')
+sl=st_set_crs(sl,4326)
+
 sc$test=1:nrow(sc)
 scjs=fromJSON(sf_geojson(sc))
 
