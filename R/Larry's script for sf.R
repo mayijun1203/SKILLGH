@@ -1,9 +1,11 @@
-# translate to the datastructure of the python one
 
-setwd("C:/Users/du/Desktop/citibikedata_dot/")
-install.packages("jsonlite")
+#1. json / dataframe
+#json file get from web and transfrom it to the dataframe version for later use
+
+# setwd("C:/Users/du/Desktop/citibikedata_dot/")
+# install.packages("jsonlite")
 library(jsonlite)
-library(tibble)
+# library(tibble)
 library(dplyr)
 # stationinfo <- fromJSON("station_information.json")
 stationinfo <- fromJSON("https://gbfs.citibikenyc.com/gbfs/en/station_information.json")
@@ -17,10 +19,15 @@ stationinfo_sf = st_as_sf(stationinfo, coords = c("lon", "lat"),
                  crs = 4326)
 plot(stationinfo_sf$geometry)
 
+head(stationinfo_sf)
+
+
+
+#2. sf and spatial join
 
 
 #read sf
-setwd("~/Desktop/nynta_20d")st_read()
+setwd("~/Desktop/nynta_20d")
 nta <- st_read("nynta.shp")
 # Simple feature collection with 195 features and 7 fields
 # sf which means simple feature
@@ -33,7 +40,8 @@ st_crs(nta) == st_crs(stationinfo_sf)
 
 ntastation<-st_join(nta,stationinfo_sf)
 nta$count<-lengths(st_intersects(nta, stationinfo_sf))
-
+library(viridis)
+library(ggplot2)
 ggplot() +
   geom_sf(data = nta, aes(fill =count  )) +
   scale_fill_viridis(discrete = F, direction = 1, option="magma")
@@ -49,22 +57,22 @@ ntastationplot
 
 
 
+#3. ggplot for sf
+
 
 
 # install.packages("viridis")
-library(viridis)
 
-library(ggplot2)
 
 ggplot() +
-  geom_sf(data = ntastationplot, aes(fill =stationcount  )) +
+  geom_sf(data = ntastationplot, aes(fill =capacity  )) +
   scale_fill_viridis(discrete = F, direction = 1, option="magma")
 
 
 p <- ggplot() +
-  geom_sf(data = ntastationplot, aes(fill = stationcount) , size=0, alpha=0.9) +
+  geom_sf(data = ntastationplot, aes(fill = capacity) , size=0, alpha=0.9) +
   theme_void() +
-  scale_fill_viridis(breaks=c(10,15,20,25,30,35,40,50,100), name="Number of citi bike station", guide = guide_legend( keyheight = unit(2, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
+  scale_fill_viridis(breaks=c(10,15,20,25,30,35,40,50,100), name="citi bike capacity", guide = guide_legend( keyheight = unit(2, units = "mm"), keywidth=unit(12, units = "mm"), label.position = "bottom", title.position = 'top', nrow=1) ) +
   labs(
     title = "NYC citi bike station capacity by NTA",
     subtitle = "NYC planning",
