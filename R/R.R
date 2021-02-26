@@ -488,8 +488,8 @@ for (i in 1:length(cat)){
 }
 p=p %>%
   layout(mapbox=list(style='carto-positron',
-                     center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
-                                 lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
+                     center=list(lon=(st_bbox(sl)['xmin']+st_bbox(sl)['xmax'])/2,
+                                 lat=(st_bbox(sl)['ymin']+st_bbox(sl)['ymax'])/2),
                      zoom=9.5),
          title=list(text='<b>Discrete Line</b>',
                     font=list(size=20),
@@ -526,30 +526,31 @@ sl=st_buffer(sl,200,endCapStyle='FLAT')
 sl=st_transform(sl,4326)
 sljs=fromJSON(sf_geojson(sl))
 
-p=plot_ly(type='choroplethmapbox',
-          name='',
-          geojson=sljs,
-          featureidkey='properties.cartodb_id',
-          locations=sl$cartodb_id,
-          z=sl$shape_stle,
-          zmin=0,
-          zmax=5000,
-          colorscale='Viridis',
-          colorbar=list(lenmode='fraction',
-                        len=1,
-                        y=0.5,
-                        yanchor='middle',
-                        title=list(text='Shape Length',
-                                   font=list(size=16)),
-                        ticklen=5,
-                        tickfont=list(size=12),
-                        outlinewidth=0),
-          reversescale=T,
-          marker=list(line=list(width=0)),
-          hovertemplate='<b>Segment ID: </b>%{location}<br><b>Shape Length: </b>%{z:#.2f}') %>%
+p=plot_ly() %>%
+  add_trace(type='choroplethmapbox',
+            name='',
+            geojson=sljs,
+            featureidkey='properties.cartodb_id',
+            locations=sl$cartodb_id,
+            z=sl$shape_stle,
+            zmin=0,
+            zmax=5000,
+            colorscale='Viridis',
+            colorbar=list(lenmode='fraction',
+                          len=1,
+                          y=0.5,
+                          yanchor='middle',
+                          title=list(text='Shape Length',
+                                     font=list(size=16)),
+                          ticklen=5,
+                          tickfont=list(size=12),
+                          outlinewidth=0),
+            reversescale=T,
+            marker=list(line=list(width=0)),
+            hovertemplate='<b>Segment ID: </b>%{location}<br><b>Shape Length: </b>%{z:#.2f}') %>%
   layout(mapbox=list(style='carto-positron',
-                     center=list(lon=(st_bbox(df)['xmin']+st_bbox(df)['xmax'])/2,
-                                 lat=(st_bbox(df)['ymin']+st_bbox(df)['ymax'])/2),
+                     center=list(lon=(st_bbox(sl)['xmin']+st_bbox(sl)['xmax'])/2,
+                                 lat=(st_bbox(sl)['ymin']+st_bbox(sl)['ymax'])/2),
                      zoom=9.5),
          title=list(text='<b>Continuous Line</b>',
                     font=list(size=20),
@@ -570,10 +571,60 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuou
 
 # Polygon
 # Discrete Value
+library(sf)
+library(geojsonsf)
+library(rjson)
+library(plotly)
+zcta=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/zcta.geojson')
+zcta=st_set_crs(zcta,4326)
+zcta$test=sample(c('a','b','c'),nrow(zcta),replace=T)
 
+cat=c('a','b','c')
+catval=c(1,2,3)
+catcolor=c('rgba(215,25,28,0.8)','rgba(255,255,191,0.8)','rgba(43,131,186,0.8)')
 
-
-
+p=plot_ly()
+for (i in 1:length(cat)[1]){
+  p=p %>%
+    add_trace(type='choroplethmapbox',
+              name=cat[i],
+              geojson=fromJSON(sf_geojson(zcta[zcta$test==cat[i],])),
+              featureidkey='properties.ZCTA5CE10',
+              locations=zcta[zcta$test==cat[i],][['ZCTA5CE10']],
+              z=catval[i],
+              colorscale=list(c(0,catcolor[i]),list(1,catcolor[i])),
+              colorbar=list(thicknessmode='pixels',
+                            thickness=30,
+                            lenmode='pixels',
+                            len=30,
+                            y=0.5+0.03*(length(cat)-2*i+1),
+                            yanchor='middle',
+                            outlinewidth=0,
+                            tickvals=catval[i],
+                            ticktext=cat[i],
+                            ticklen=0,
+                            tickfont=list(size=16)),
+              marker=list(line=list(color='white',
+                                    width=0.1)),
+              hovertemplate='<b>ZCTA: </b>%{location}')
+}
+p=p %>%
+  layout(mapbox=list(style='carto-positron',
+                     center=list(lon=(st_bbox(zcta)['xmin']+st_bbox(zcta)['xmax'])/2,
+                                 lat=(st_bbox(zcta)['ymin']+st_bbox(zcta)['ymax'])/2),
+                     zoom=8),
+         title=list(text='<b>Discrete Polygon</b>',
+                    font=list(size=20),
+                    x=0.5,
+                    xanchor='center'),
+         font=list(family='arial',
+                   color='black'),
+         margin=list(l=50,
+                     r=50,
+                     t=50,
+                     b=50))
+p
+htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/discrete_polygon.html')
 
 
 
@@ -583,48 +634,47 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuou
 
 
 # Continuous Value
-# Polygon
 library(sf)
 library(geojsonsf)
 library(rjson)
 library(plotly)
 zcta=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/zcta.geojson')
-zcta=st_set_crs(zcta,4326)zcta=st_set_crs(zcta,4326)
-zcta$test=1:nrow(zcta)
+zcta=st_set_crs(zcta,4326)
+zcta$test=sample(1:100,nrow(zcta),replace=T)
 zctajs=fromJSON(sf_geojson(zcta))
 
-p=plot_ly(type='choroplethmapbox',
-          name='',
-          geojson=zctajs,
-          featureidkey='properties.ZCTA5CE10',
-          locations=zcta$ZCTA5CE10,
-          z=zcta$test,
-          colorscale='Viridis',
-          marker=list(line=list(color='white',
-                                width=0.1)),
-          colorbar=list(lenmode='fraction',
-                        len=1,
-                        y=0.5,
-                        yanchor='middle',
-                        title=list(text='Test',
-                                   font=list(family='arial',
-                                             size=16,
-                                             color='black')),
-                        tickfont=list(family='arial',
-                                      size=12,
-                                      color='black')),
-          reversescale=T,
-          hovertemplate='ZCTA: %{location}<br>Test: %{z:#.2f}') %>%
+p=plot_ly() %>%
+  add_trace(type='choroplethmapbox',
+            name='',
+            geojson=zctajs,
+            featureidkey='properties.ZCTA5CE10',
+            locations=zcta$ZCTA5CE10,
+            z=zcta$test,
+            colorscale='YlOrRd',
+            colorbar=list(lenmode='fraction',
+                          len=1,
+                          y=0.5,
+                          yanchor='middle',
+                          title=list(text='Test',
+                                     font=list(size=16)),
+                          ticklen=5,
+                          tickfont=list(size=12),
+                          outlinewidth=0),
+            marker=list(line=list(color='white',
+                                  width=0.1),
+                        opacity=0.8),
+            reversescale=T,
+            hovertemplate='<b>ZCTA: </b>%{location}<br><b>Test: </b>%{z:#.2f}') %>%
   layout(mapbox=list(style='carto-positron',
                      center=list(lon=(st_bbox(zcta)['xmin']+st_bbox(zcta)['xmax'])/2,
                                  lat=(st_bbox(zcta)['ymin']+st_bbox(zcta)['ymax'])/2),
                      zoom=8),
          title=list(text='<b>Continuous Polygon</b>',
-                    font=list(family='arial',
-                              size=20,
-                              color='black'),
+                    font=list(size=20),
                     x=0.5,
                     xanchor='center'),
+         font=list(family='arial',
+                   color='black'),
          margin=list(l=50,
                      r=50,
                      t=50,
@@ -635,115 +685,6 @@ htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/continuou
 
 
 
-
-
-
-
-
-# Discrete Value
-# Polygon
-library(sf)
-library(geojsonsf)
-library(rjson)
-library(plotly)
-zcta=st_read('https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/CARTO/zcta.geojson')
-zcta=st_read('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/CARTO/zcta.geojson')
-zcta=st_set_crs(zcta,4326)
-zcta$test=1:nrow(zcta)
-zcta$test2=rep(c(1,2,3),162)
-zctaa=zcta[zcta$test2==1,]
-zctaajs=fromJSON(sf_geojson(zctaa))
-zctab=zcta[zcta$test2==2,]
-zctabjs=fromJSON(sf_geojson(zctab))
-zctac=zcta[zcta$test2==3,]
-zctacjs=fromJSON(sf_geojson(zctac))
-
-p=plot_ly() %>%
-  add_trace(type='choroplethmapbox',
-            name='',
-            geojson=zctaajs,
-            featureidkey='properties.ZCTA5CE10',
-            locations=zctaa$ZCTA5CE10,
-            z=zctaa$test2,
-            colorscale=list(c(0,'rgba(255,0,0,0.8)'),list(1,'rgba(255,0,0,0.8)')),
-            marker=list(line=list(color='white',
-                                  width=0.1)),
-            colorbar=list(thicknessmode='pixels',
-                          thickness=30,
-                          lenmode='pixels',
-                          len=30,
-                          y=0.55,
-                          yanchor='middle',
-                          outlinewidth=0,
-                          tickvals=c(1),
-                          ticktext=c('a'),
-                          ticklen=0,
-                          tickfont=list(family='arial',
-                                        size=16,
-                                        color='black')),
-            hovertemplate='ZCTA: %{location}<br>Test: %{z:#.2f}') %>%
-  add_trace(type='choroplethmapbox',
-            name='',
-            geojson=zctabjs,
-            featureidkey='properties.ZCTA5CE10',
-            locations=zctab$ZCTA5CE10,
-            z=zctab$test2,
-            colorscale=list(c(0,'rgba(255,255,0,0.8)'),list(1,'rgba(255,255,0,0.8)')),
-            marker=list(line=list(color='white',
-                                  width=0.1)),
-            colorbar=list(thicknessmode='pixels',
-                          thickness=30,
-                          lenmode='pixels',
-                          len=30,
-                          y=0.5,
-                          yanchor='middle',
-                          outlinewidth=0,
-                          tickvals=c(2),
-                          ticktext=c('b'),
-                          ticklen=0,
-                          tickfont=list(family='arial',
-                                        size=16,
-                                        color='black')),
-            hovertemplate='ZCTA: %{location}<br>Test: %{z:#.2f}') %>%
-  add_trace(type='choroplethmapbox',
-            name='',
-            geojson=zctacjs,
-            featureidkey='properties.ZCTA5CE10',
-            locations=zctac$ZCTA5CE10,
-            z=zctac$test2,
-            colorscale=list(c(0,'rgba(0,0,255,0.8)'),list(1,'rgba(0,0,255,0.8)')),
-            marker=list(line=list(color='white',
-                                  width=0.1)),
-            colorbar=list(thicknessmode='pixels',
-                          thickness=30,
-                          lenmode='pixels',
-                          len=30,
-                          y=0.45,
-                          yanchor='middle',
-                          outlinewidth=0,
-                          tickvals=c(3),
-                          ticktext=c('c'),
-                          ticklen=0,
-                          tickfont=list(family='arial',
-                                        size=16,
-                                        color='black')),
-            hovertemplate='ZCTA: %{location}<br>Test: %{z:#.2f}') %>%
-  layout(mapbox=list(style='carto-positron',
-                     center=list(lon=(st_bbox(zcta)['xmin']+st_bbox(zcta)['xmax'])/2,
-                                 lat=(st_bbox(zcta)['ymin']+st_bbox(zcta)['ymax'])/2),
-                     zoom=8),
-         title=list(text='<b>Discrete Polygon</b>',
-                    font=list(family='arial',
-                              size=20,
-                              color='black'),
-                    x=0.5,
-                    xanchor='center'),
-         margin=list(l=50,
-                     r=50,
-                     t=50,
-                     b=50))
-p
-htmlwidgets::saveWidget(p,'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/discrete_polygon.html')
 
 
 
@@ -790,15 +731,15 @@ df = read.csv(
 h = as.character(
   read.csv(
     'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/psam_h36.csv',
-    header = FALSE,
+    header = F,
     nrows = 1,
-    stringsAsFactors = FALSE,
+    stringsAsFactors = F,
   )
 )
 dt = read.csv(
   'C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/psam_h36.csv',
-  header = FALSE,
-  stringsAsFactors = FALSE,
+  header = F,
+  stringsAsFactors = F,
   skip = 1000,
   nrows = 1000
 )
@@ -810,8 +751,3 @@ k1 = df[df['BROADBND'] == 1, c('PUMA', 'BROADBND')]
 k2 = subset(df, BROADBND == 1, c('PUMA', 'BROADBND'))
 k3 = df %>% select(PUMA, BROADBND) %>% filter(BROADBND == 1)
 
-
-# ifelse
-df4 = df %>% select(PUMA) %>% mutate(PUMA4004 = ifelse(PUMA == 4004, 1, 0))
-df4 = df %>% select(PUMA) %>% mutate(PUMACAT = ifelse(PUMA == 4004, 1, ifelse(PUMA ==
-                                                                                4010, 2, 0)))
