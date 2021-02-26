@@ -23,10 +23,17 @@ qplot(data=df,x=Date,y=Ridership,color=Type,geom='line')
 # ggplot
 p=ggplot()+
   theme_minimal()+
-  geom_line(data=df,mapping=aes(x=Date,y=Ridership,color=Type2),size=0.5)+
+  geom_line(data=df,
+            mapping=aes(x=Date,y=Ridership,color=Type2),
+            size=0.5)+
   scale_color_manual(values=c('Bus'='steelblue', 'Subway'='tomato'))+
-  scale_x_date(date_breaks='2 months',date_minor_breaks='1 month',date_labels="%b %Y",expand=c(0.01,0.01))+
-  scale_y_continuous(n.breaks=5,labels=scales::label_number_si(0.1),expand=c(0.05,0.05))+
+  scale_x_date(date_breaks='2 months',
+               date_minor_breaks='1 month',
+               date_labels="%b %Y",
+               expand=c(0.01,0.01))+
+  scale_y_continuous(n.breaks=5,
+                     labels=scales::label_number_si(0.1),
+                     expand=c(0.05,0.05))+
   labs(title=paste0('Subway and Bus Estimated Ridership ',format(min(df$Date),'%m/%d/%Y'),' - ',format(max(df$Date), '%m/%d/%Y')),
        caption='Source: MTA',
        color='')+
@@ -38,7 +45,6 @@ p=ggplot()+
         axis.text=element_text(size=11))
 p
 ggsave('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/mta.pdf',plot=p,width=11,height=8.5,dpi=300)
-
 
 
 
