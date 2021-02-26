@@ -14,7 +14,6 @@ k = list(1, 2, 'a')
 
 
 # Read data
-data.frame()
 df = read.csv('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/psam_h36.csv')
 
 
@@ -747,7 +746,11 @@ colnames(dt) = h
 
 
 # Subset
+library(tidyverse)
+df = read.csv('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/psam_h36.csv')
 k1 = df[df['BROADBND'] == 1, c('PUMA', 'BROADBND')]
 k2 = subset(df, BROADBND == 1, c('PUMA', 'BROADBND'))
 k3 = df %>% select(PUMA, BROADBND) %>% filter(BROADBND == 1)
-
+head(k1)
+head(k2)
+head(k3)
