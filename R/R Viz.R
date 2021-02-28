@@ -2,13 +2,13 @@
 # Chart
 library(tidyverse)
 url='https://new.mta.info/document/20441'
-df=read.csv(url,stringsAsFactors=F)
-df = df %>%
-  mutate(Date = as.Date(Date, '%m/%d/%Y')) %>%
-  mutate(Subway = as.integer(Subways..Total.Estimated.Ridership)) %>%
-  mutate(Bus = as.integer(Buses..Total.Estimated.Ridership)) %>%
+df=read.csv(url,colClasses='character',stringsAsFactors=F)
+df=df %>%
+  mutate(Date=as.Date(Date,'%m/%d/%Y')) %>%
+  mutate(Subway=as.integer(Subways..Total.Estimated.Ridership)) %>%
+  mutate(Bus=as.integer(Buses..Total.Estimated.Ridership)) %>%
   arrange(Date) %>%
-  select(Date, Subway, Bus) %>% 
+  select(Date,Subway,Bus) %>%
   gather(key=Type,value=Ridership,c('Subway','Bus')) %>%
   mutate(Type2=factor(Type,levels=c('Subway','Bus')))
 
@@ -90,27 +90,17 @@ p=plot_ly()%>%
                       color='steelblue'),
             hovertemplate='%{y:#.3s}') %>%
   layout(title=list(text=paste0('<b>Subway and Bus Estimated Ridership ',format(min(df$Date),'%m/%d/%Y'),' - ',format(max(df$Date), '%m/%d/%Y'),' (Source: ',"</b><a href='https://new.mta.info/coronavirus/ridership'>MTA</a>",'<b>)</b>'),
-                    font=list(family='arial',
-                              size=20,
-                              color='black'),
+                    font=list(size=20),
                     x=0.5,
                     xanchor='center'),
          xaxis=list(title=list(text='Date',
-                               font=list(family='arial',
-                                         size=14,
-                                         color='black')),
-                    tickfont=list(family='arial',
-                                  size=12,
-                                  color='black'),
+                               font=list(size=14)),
+                    tickfont=list(size=12),
                     fixedrange=T,
                     showgrid=T),
          yaxis=list(title=list(text='Ridership',
-                               font=list(family='arial',
-                                         size=14,
-                                         color='black')),
-                    tickfont=list(family='arial',
-                                  size=12,
-                                  color='black'),
+                               font=list(size=14)),
+                    tickfont=list(size=12),
                     rangemode='nonnegative',
                     fixedrange=T,
                     showgrid=T,
@@ -118,13 +108,13 @@ p=plot_ly()%>%
                     zerolinecolor='#eee',
                     zerolinewidth=3),
          legend=list(orientation='h',
-                     font=list(family='arial',
-                               size=16,
-                               color='black'),
+                     font=list(size=16),
                      x=0.5,
                      xanchor='center',
                      y=1,
                      yanchor='bottom'),
+         font=list(family='arial',
+                   color='black'),
          margin=list(l=100,
                      r=100,
                      t=100,
