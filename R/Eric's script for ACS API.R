@@ -13,7 +13,7 @@ Vacancies$Name <- gsub("\\[", "", Vacancies$Name)
 Vacancies$tract <- gsub("\\]", "", Vacancies$tract)
 
 #Import crosswalk file for tracts to NTA
-Tract2NTA <- read.csv("/Volumes/DCP_WFH/DCP_WFH/Reference/Tract2010_to_NTA2010.csv")
+Tract2NTA <- read.csv("https://raw.githubusercontent.com/mayijun1203/SKILLGH/master/RTract2010_to_NTA2010.csv")
 
 #Create a variable for boro that matches tract to NTA crosswalk file
 Vacancies$Boro <- 0

@@ -93,7 +93,6 @@ all.equal(workerfl,workerap)
 all.equal(workerfl,workervc)
 
 
-# Aggregate
 
 
 
@@ -102,15 +101,7 @@ all.equal(workerfl,workervc)
 
 
 
-
-
-
-
-
-
-
-
-# Subset
+# Filter
 library(tidyverse)
 df=read.csv('C:/Users/mayij/Desktop/DOC/GITHUB/SKILLGH/R/psam_h36.csv')
 k1=df[df['BROADBND']==1,c('PUMA','BROADBND')]
