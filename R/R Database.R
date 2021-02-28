@@ -53,29 +53,3 @@ dbDisconnect(con)
 
 
 
-
-
-##cross validation 2
-
-##weekly update
-setwd("C:/Users/du/Desktop/NEWLY/2019/")
-
-library(RSQLite)
-library(dplyr)
-# Create an ephemeral in-memory RSQLite database
-con <- dbConnect(RSQLite::SQLite(), "CITI20190307.sqlite3")
-dbListTables(con)
-
-# 
-# dbSendQuery(con,"DELETE FROM trip where startdate >='2019-10-31'")
-
-tripsdailyall2 <- dbGetQuery(con, "SELECT startdate as startdate, count(*) From trip Group by startdate")
-
-# tripsdailyall <- dbGetQuery(con, "SELECT count(*) From trip")
-dbDisconnect(con)
-
-
-
-
-
-conn = sqlite3.connect(path + 'maroctod2019.sqlite3')
