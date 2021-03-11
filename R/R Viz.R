@@ -4,7 +4,7 @@ library(tidyverse)
 url='https://new.mta.info/document/20441'
 df=read.csv(url,colClasses='character',stringsAsFactors=F)
 df=df %>%
-  mutate(Date=as.Date(Date,'%m/%d/%Y')) %>%
+  mutate(Date=as.Date(open,'%m/%d/%Y')) %>%
   mutate(Subway=as.integer(Subways..Total.Estimated.Ridership)) %>%
   mutate(Bus=as.integer(Buses..Total.Estimated.Ridership)) %>%
   arrange(Date) %>%
