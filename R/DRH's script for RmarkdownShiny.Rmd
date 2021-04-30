@@ -1,0 +1,330 @@
+---
+title: "Rmarkdown Shiny Example"
+author: "DRH"
+date: "4/30/2021"
+output: html_document
+runtime: shiny
+theme: cosmo
+mainfont: Georgia
+fig_caption: true
+
+rmd_output_metadata:
+  rsc_output_files:
+    - "global.R"
+
+resource_files:
+- global.R
+- RRAug7R.csv
+- NYCPopChg.csv
+- RRTimeUS.csv
+- NTAs.geojson
+- CT2010.geojson
+- nycd.geojson
+- PUMAs.geojson
+- NYBB.geojson
+- images/22reade.png
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Set a code chunk to use for rendering R output into documents. Enable caching globally to shorten the rendering time. Use "FALSE" to display the output of a code chunk but not the underlying R code. Note: when working with Rmarkdown & Shiny you do not need setwd(). Instead, make sure all files are in the project folder.
+```
+```{r global, include=FALSE}
+# load data in 'global' chunk so it can be shared by all users of the dashboard
+#LIBRARIES (make sure all packages are installed)
+library(rsconnect)
+library(shiny) # Create interactive web apps in R
+library(tidyverse)# designed to make it easy to install and load multiple 'tidyverse' packages in a single step
+# The following are a part of the tidyverse package
+#ggplot2 For static plotting and maps.
+#dplyr For data wrangling. Offers a grammar of data manipulation, providing a consistent set of verbs that solve the most common data manipulation challenges.
+#tidyr  Offers a set of functions that help you get to tidy data. Tidy data is data with a consistent form: in brief, every variable goes in a column, and every column is a variable
+#readr Offers a fast and friendly way to read rectangular data (like csv, tsv, and fwf)
+library(lubridate) # Not part of core tidyverse. Makes it easier to work with dates
+
+library(sf) # “Special Features” for reading, writing and working with spatial object
+library(RMySQL) # is a database interface and MySQL driver for R
+# JSON file stores data as text in human-readable format. R can read JSON files using the rjson package
+library(geojsonio) # read and write geojson files
+library(leaflet) #Returns a leaflet map widget
+library(RColorBrewer)
+library(DT) # an R interface to the JavaScript library DataTables.
+library(data.table) #aggregation of large data. Need for fread.
+library(ggpubr) # provides some easy-to-use functions for creating and customizing 'ggplot2'- based publication ready plots
+library(st) # use for data transformation
+library(dygraphs)#for charting time series data
+#***************Working with Images********************
+library(mapview) #use to render images of maps and interactive viewing
+library(webshot) #take screen shots of web pages from R
+library(htmlwidgets) #embed widgets in Rmarkdown
+library(png) #for grabbing the dimensions of png files
+library(jpeg) #for grabbing the dimensions of png files
+library(magick) #support for images and gifs
+library(cowplot)
+
+#*****************
+#BASE DATA
+#*****************
+#................Read in CSV files................
+
+RR <- fread("RRAug7R.csv")
+BKCD7 <- fread ("NYCPopChg.csv")
+RRTimeUS <- fread ("RRNYCUS.csv")
+
+#...................Upload as a data table...................
+#....................................
+RR_data <- as.data.table(RR)
+BKCD7_data <- as.data.table(BKCD7)
+
+#......Read in geoJSON files using simple features......
+##If using ESRI shapefiles convert to geoJSON using geojson_json(). Read_sf is faster than readOGR, but the latter works best with ESRI files. ESRI shapefiles must be on the hard drive. When using readOGR,the shapefile you are reading must be in your current working directory. Then you can refer to the dsn as “.” Alternatively getwd() works.
+
+NTA_geojson <- read_sf("NTAs.geojson")
+CT10_geojson <- read_sf("CT2010.geojson")
+CD_geojson <- read_sf("nycd.geojson")
+PUMA10_geojson <- read_sf("PUMAs.geojson")
+BB_geojson <- read_sf("NYBB.geojson")
+
+#.............Merge CSVs to Shapefiles.............
+#...........................................
+#********************.
+#Response Rates
+#********************.
+NTAAug7 <-dplyr::left_join(NTA_geojson , RR_data, by="NTACode")
+names(NTAAug7)
+#Can also use Tigris geojoin
+#Rearrange Columns
+NTAAug7 <- NTAAug7 [c("NTAName.x","BoroCode", "BoroName", "CountyFIPS","NTACode", "Shape_STAr", "Shape_STLe", "Borough", "NTAName.y", "Aug7")]
+
+#********************.
+#Pop Change
+#********************.
+Chg <-merge(CT10_geojson, BKCD7_data, by="BoroCT2010")
+names(Chg)
+#Rearrange Columns
+Chg<- Chg  [c( "NTA","LabelCT","BoroCT2010",  "CTLabel", "BoroCode.x", "BoroName", "CT2010.x", "CDEligibil", "NTACode", "NTAName", "PUMA.x", "Shape_STAr", "Shape_STLe", "Borough", "BoroCode.y", "CT2010.y", "PUMA.y", "Pop2010", "Pop201418", "PopChg", "PopPCtChg", "PctPopRnd", "PopBin", "HU2010", "HU2019", "HUChg", "HUPCtChg", "PctHURnd", "HUBin", "ACSHU", "ACSHUChg", "ACSHUPCtChg")]
+#Make sure negative characters read as numbers
+Chg$PctPopRnd = as.numeric(as.character(Chg$PctPopRnd))
+Chg$PctHURnd = as.numeric(as.character(Chg$PctHURnd))
+names(Chg)
+
+#......Convert lat-long coordinates......
+#..............................
+#***********************.
+#Response Rates Lat Long
+#***********************.
+#Aug 7 Response Rates
+mydataRR <- st_transform(NTAAug7, "+init=epsg:4326")
+
+#********************.
+#Pop Change Lat Long
+#********************.
+#CT
+mydataChg <- st_transform(Chg, "+init=epsg:4326")
+
+#CD
+CDshp  <- st_transform(CD_geojson, "+init=epsg:4326")
+
+#PUMA
+PUMAshp  <- st_transform(PUMA10_geojson, "+init=epsg:4326")
+
+#Boro Boundary
+BBshp <- st_transform(PUMA10_geojson, "+init=epsg:4326")
+
+#**********************************
+#Customize Map
+#**********************************
+#Response Rates
+mybinsRR <- c(-Inf,48.1,50.4,52.8,56.9,61,Inf)
+mycols_lightdarkRR <- c("#FFFFFF","#fcc5c0", "#fa9fb5", "#f768a1", "#c51b8a", "#7a0177")
+mycolsRR <- c("#7a0177","#c51b8a", "#f768a1","#fa9fb5","#fcc5c0","#FFFFFF")
+mylabelsRR <- c("less than 48.1%", "48.1% to 50.3%", "50.4% to 52.7%","52.8% to 56.8%","56.9% to 60.9%","More than 61.1%")
+palRR <- colorBin(mycolsRR, domain = mydataRR$Aug7, bins = mybinsRR, na.color = "#E0E0E0")
+
+#Percent Change
+mybinsChg <- c(Inf,25.0,15.0,5.0,-5.0,-15.0,-25.0,-Inf)
+mycolsChg  <- c("#F24949","#FF9999","#FFCCCC","#FFFFFF","#CCDBFF","#80B9FF","#3984E6")
+mylabelsChg  <- c("Gain of 25.0% or more","15.0% to 24.9%","5.0% to 14.9%","-4.9% to 4.9%","-5.0% to -14.9%","-15.0% to -24.9%","Loss of 25.0% or more")
+palChg <- colorBin(mycolsChg, domain = mydataChg$PctPopRnd, bins = mybinsChg, na.color = "#D0D0D0")
+
+#****************************
+#Set Up Response Rate Leaflet
+#****************************
+NTA_popupRR <- paste0("<strong>Neighborhood: </strong>",
+mydataRR$NTAName.x, 
+"<br><strong>Response Rate: </strong>", mydataRR$Aug7)
+
+#*************************
+#Set Up Pop Change Leaflet
+#*************************
+CT_popupChg <- paste0("<strong>Neighborhood: </strong>",
+mydataChg$NTA,
+"<br><strong>Census Tract: </strong>", mydataChg$LabelCT,
+"<br><strong>2010: </strong>", mydataChg$Pop2010,
+"<br><strong>2014-2018: </strong>", mydataChg$Pop201418,
+"<br><strong>Percent Change in Population: </strong>", mydataChg$PctPopRnd)
+
+CD_popupChg <- paste0("<strong>Community District: </strong>",
+CDshp$BoroCD)
+
+PUMA_popupChg <- paste0("<strong>PUMA: </strong>",
+PUMAshp$PUMA)
+
+```
+<br/><br/>
+
+
+<center> <h3>**2020 Response Rates for August 7th by Neighborhood**</h3> </center>
+
+The self-response rate measures the percentage of housing units that self-responded to the 2020 Census either online, by mail, or by phone. 
+<br/><br/>
+
+#### **Why We Care and the Task at Hand**  
+<p>If an area has a low self-response rate, it means census enumerators will need to knock on more doors to count residents in-person, and it is likely that people in the area may be missed or counted inaccurately.</p>  
+<p>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;As part of the Non-Response Follow-up (NRFU) operation, the Census Bureau has started in-person visits on August 6th, but self-response is still available through September 30th, which is now the last day of NRFU. High self-response is the best way of ensuring a complete count, with data that truly reflect the neighborhoods of our city. Conducting a census in the middle of a pandemic continues to be an unprecedented challenge, all but eliminating events that build a critical mass of awareness and curbing on-the-ground personal appeals that have proven to be effective in the past.</p>  
+<p>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Yet, in the midst of this very constrained environment, there are opportunities. The self-response period has been extended well beyond the original schedule, allowing us to gain some ground on what could have been a catastrophically low level of self-response. The phased re-opening of the city may now permit a limited level of on-the-ground outreach – the physical neighborhood presence of community organizations and other trusted voices can make all the difference in boosting self-response. This is now the task at hand.</p>   
+<p>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The new format of DCP’s Report on NYC 2020 Census Self-Response is intended to support this next phase of outreach by moving the focus entirely to neighborhoods with the lowest levels of self-response, where targeted outreach efforts are most needed. We identify places where the current level of self-response is likely to have deleterious effects on the quality of data and on the count itself. With NRFU, the Census Bureau tries to fill the gap in data produced by low self-response. However NRFU and post-NRFU operations can introduce errors that compromise the enumeration. These include the use of responses from neighbors (i.e., proxy respondents), the use of administrative records (e.g., Social Security, IRS tax records), and the creation of data through statistical means (i.e., imputation), none of which are good substitutes for self-response.</p>    
+
+<br/><br/>
+
+##### **Figure 1. Interactive Map**  
+```{r Aug7, echo=FALSE}
+#Display Response Rate Leaflet with Legend
+leafletRR <-leaflet(data = mydataRR) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -73.9, lat = 40.705, zoom = 10) %>%
+  addPolygons(fillColor = ~palRR(Aug7), 
+              fillOpacity = 0.8, 
+              color = "#BDBDC3",
+              weight = 1, 
+              popup = NTA_popupRR) %>%
+  addLegend("bottomright",
+            pal = palRR,
+            values = ~ `Aug7`,
+            title = "Response Rate",
+na.label = "Airports/Open Space",
+            labFormat = function(type,cuts,p){
+paste0(mylabelsRR)},
+            opacity = 1)
+
+leafletRR
+```
+
+<br/><br/>
+
+### **Population Change by Census Tract**
+
+Here is another example of an interactive map
+
+<br> Percent Change in Population by Census Tract <br> New York City, 2010 to 2014-2018
+
+
+
+```{r PctPopRnd, echo=FALSE}
+#Display Pop Change Leaflet with Legend
+leafletPopChg <-leaflet(data = mydataChg) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -74.0093, lat = 40.6527, zoom = 12) %>%
+  addPolygons(fillColor = ~palChg(PctPopRnd), 
+group = "Data",
+              fillOpacity = 0.8, 
+              color = "#BDBDC3",
+              weight = 1, 
+              popup = CT_popupChg) %>%
+  addLegend("bottomright",
+group = "Data",
+            pal = palChg,
+            values = ~ `PctPopRnd`,
+            title = "Percent Change",
+na.label = "Population < 100 in 2010",
+            labFormat = function(type,cuts,p){
+paste0(mylabelsChg)},
+            opacity = 1) %>%
+addPolygons(data=CDshp , weight = 2, fill = F, color = 'yellow',popup = CD_popupChg, group = "Community District") %>%
+addPolygons(data=PUMAshp , weight = 1.5, fill = F, color = 'gray',popup = PUMA_popupChg, group = "PUMA")%>%
+addPolygons(data=BBshp, weight = 1, fill = F, color = 'black', group = "Borough")%>%
+ # Layers control
+  addLayersControl(
+        overlayGroups = c("Borough","Community District", "PUMA"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+leafletPopChg
+```
+
+<br/><br/>
+
+#### **You can insert graphs and tables**
+<br/><br/>
+
+##### **Figure 3. Comparison of 2020 Census Self-Response Rates**
+```{r echo=FALSE, warning=FALSE}
+#Create Line Graph
+RR2 <- dygraph(RRTimeUS, main = "2020 Census Response Rates") %>% dyRangeSelector()  %>%
+ dyAxis("y", label = "Response Rate", valueRange = c(0, 75)) %>%
+dyOptions(includeZero = TRUE, stackedGraph = TRUE,
+            axisLineColor = "black", axisLineWidth = 1.5, fillGraph = FALSE, drawGrid = FALSE)%>%
+dySeries("NYC", label = "NYC", strokeWidth = .5, drawPoints = TRUE, pointSize = 2, color = "navy")  %>%
+dyGroup(c("US", "NY"), drawPoints = TRUE, color = c("orange", "green"))
+
+ 
+#Plot Line Graph
+RR2
+```
+
+<br/><br/>
+
+This is a sample of a table that people can filter:
+```{r mytable, echo=FALSE}
+mytable <- datatable(RR_data,class = 'cell-brder stripe',rownames=F,filter='top', editable=TRUE)
+mytable
+```
+
+<br/><br/>
+
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+## Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+
+```{r eruptions, echo=FALSE}
+inputPanel(
+  selectInput("n_breaks", label = "Number of bins:",
+              choices = c(10, 20, 35, 50), selected = 20),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 0.2, max = 2, value = 1, step = 0.2)
+)
+
+renderPlot({
+  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
+       xlab = "Duration (minutes)", main = "Geyser eruption duration")
+  
+  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
+  lines(dens, col = "blue")
+})
+```
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+shinyAppDir(
+  system.file("examples/06_tabsets", package = "shiny"),
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+
