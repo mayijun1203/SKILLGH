@@ -20,6 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install GitPython
+        pip install pytz
 
     - name: Run test.py
       env:
