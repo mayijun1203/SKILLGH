@@ -16,7 +16,7 @@ import pandas as pd
 path='./GITHUB/'
 timestamp=datetime.datetime.now(pytz.timezone('US/Eastern')).strftime('%m%d%Y')
 df=pd.DataFrame()
-df.to_csv(path+'/timestamp.csv')
+df.to_csv(path+'timestamp.csv')
 
 
 
