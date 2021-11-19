@@ -24,6 +24,8 @@ jobs:
         pip install pandas
 
     - name: Run test.py
+      env:
+        t: ${{secrets.test}}
       run: |
         python ./GITHUB/test.py
       

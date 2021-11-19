@@ -1,11 +1,12 @@
+import os
 import git
 import datetime
 import pytz
 import pandas as pd
 
+print(os.environ['t'])
 
-
-timestamp=datetime.datetime.now(pytz.timezone('US/Eastern')).strftime('%m%d%Y')
+timestamp=datetime.datetime.now(pytz.timezone('US/Eastern')).strftime('%m%d%H%M%S')
 df=pd.DataFrame()
 df.to_csv('./GITHUB/'+timestamp+'.csv')
 
