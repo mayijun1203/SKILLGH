@@ -21,6 +21,7 @@ jobs:
       run: |
         pip install GitPython
         pip install pytz
+        pip install pandas
 
     - name: Run test.py
       env:
