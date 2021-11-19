@@ -17,11 +17,9 @@ jobs:
       with:
         python-version: 3.10.0
 
-    - name: "Install dependencies"
+    - name: Install dependencies
       run: |
-        python -VV
-        python -m site
-        python -m pip install git
+        pip install git
 
     - name: Run test.py
       env:
