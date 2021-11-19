@@ -1,6 +1,5 @@
 import os
 
-# df=os.environ['t']
-df='a'
+df=os.environ['t']
 
 print(df)
