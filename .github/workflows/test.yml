@@ -19,7 +19,8 @@ jobs:
 
     - name: Run test.py
       env:
-        t: ${{secrets.test}}
+        user: ${{secrets.user}}
+        key: ${{secrets.key}}
       run: |
         python ./GITHUB/test.py
       
