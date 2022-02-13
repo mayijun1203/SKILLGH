@@ -5,7 +5,7 @@ name: mta tracker
 
 on:
   schedule:
-      - cron: '0 15 * * *'
+      - cron: '0 20 * * *'
 
 jobs:
   build:
