@@ -4,10 +4,10 @@ import datetime
 import pytz
 import pandas as pd
 
-print(os.environ['t'])
 
 timestamp=datetime.datetime.now(pytz.timezone('US/Eastern')).strftime('%m%d%H%M%S')
 df=pd.DataFrame()
+df.loc[0]=os.environ['t']
 df.to_csv('./GITHUB/'+timestamp+'.csv')
 
 
