@@ -30,6 +30,6 @@ jobs:
 
     - name: Run mta.py
       env:
-        t:${{secrets.test}}
+        t: ${{secrets.test}}
       run: |
         python ./GITHUB/mta.py
