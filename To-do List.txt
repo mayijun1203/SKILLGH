@@ -2,14 +2,17 @@ Census
 MapPLUTO
 LION
 Sidewalk
-
-MTA/NYMTC HTS
 Travel Demand Model
 CEQR
+TDDAT
+Synchro
+HCS
+
+
+MTA/NYMTC HTS
 GTFS
 GTFSRT
 OSM
-TDDAT
 Geosupport
 TLC
 Digital Ocean
@@ -17,8 +20,6 @@ HTML,CSS,JS,Mapbox
 GitHub Action
 Travelshed
 Walkshed
-Synchro
-HCS
 onstparking
 uber movement
 API
