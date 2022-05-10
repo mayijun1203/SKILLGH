@@ -1,0 +1,45 @@
+id: "000001A"
+trip_update {
+  trip {
+    trip_id: "063548_A..N"
+    start_time: "10:35:29"
+    start_date: "20220510"
+    route_id: "A"
+  }
+  stop_time_update {
+    arrival {
+      time: 1652198953
+    }
+    departure {
+      time: 1652198953
+    }
+    stop_id: "A06N"
+  }
+  stop_time_update {
+    arrival {
+      time: 1652199017
+    }
+    departure {
+      time: 1652199017
+    }
+    stop_id: "A05N"
+  }
+  stop_time_update {
+    arrival {
+      time: 1652199257
+    }
+    departure {
+      time: 1652199257
+    }
+    stop_id: "A03N"
+  }
+  stop_time_update {
+    arrival {
+      time: 1652199467
+    }
+    departure {
+      time: 1652199467
+    }
+    stop_id: "A02N"
+  }
+}
