@@ -8,19 +8,19 @@ TDDAT
 Synchro
 HCS
 GitHub Action
+GTFS
+GTFSRT
+Digital Ocean
+Travelshed
+Walkshed
 
 
 
 MTA/NYMTC HTS
-GTFS
-GTFSRT
 OSM
 Geosupport
 TLC
-Digital Ocean
 HTML,CSS,JS,Mapbox
-Travelshed
-Walkshed
 onstparking
 uber movement
 API
