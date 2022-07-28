@@ -5,18 +5,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Test</title>
+
     <style>
-        h1 {
+        .t1 {
             color: red;
         }
 
-        .t1 {
-            color: blue;
-        }
-
         #t2 {
-            color: green;
+            color: blue;
         }
     </style>
 </head>
@@ -31,16 +28,19 @@
     </div>
 
     <div>
-        <p style="color:blue;">dfab;jkjafdskf;a</p>
+        <p class="t1">fdafjda;sflsdjfklda;f</p>
     </div>
 
     <div>
-        <a href="https://www.google.com">test link</a>
+        <a href="https://www.google.com"> Google </a>
     </div>
+
     <script>
-        let df = document.getElementById('t2').innerHTML;
+        let df = document.getElementById('t2').innerText;
         console.log(df);
+        document.getElementById('t2').innerText='Test3';
     </script>
+
 </body>
 
 </html>

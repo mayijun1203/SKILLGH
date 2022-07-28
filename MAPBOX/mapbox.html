@@ -250,7 +250,7 @@
                 'sourcedata': 'https://raw.githubusercontent.com/mayijun1203/MLGH/master/mapbox/polygontestcat.geojson', // data source
                 'layerid': 'pglayer', // layer id
                 'layertype': 'fill', // symbology type
-                'layername': 'Polygon', // layer name for the legend
+                'layername': 'NTA Polygons', // layer name for the legend
                 'layerfilter': ['==', 'BoroName', 'Queens'], // filter
                 'layervisibility': 'visible', // visibility of the layer
                 'layercolname': 'cat', // category column name
@@ -291,7 +291,7 @@
                 'id': layerContent['layerid'],
                 'type': layerContent['layertype'],
                 'source': layerContent['sourceid'],
-                // 'filter': layerContent['layerfilter'],
+                'filter': layerContent['layerfilter'],
                 'layout': {
                     'visibility': layerContent['layervisibility'],
                     'fill-sort-key': layerSortKey,
